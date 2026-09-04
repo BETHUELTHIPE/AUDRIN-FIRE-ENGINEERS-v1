@@ -1,0 +1,6 @@
+{
+  "name": "AUDRIN FIRE ENGINEERS",
+  "description": "Commercial and non-domestic fire-detection and alarm service management platform aligned with SANS 10139 recommendations.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
