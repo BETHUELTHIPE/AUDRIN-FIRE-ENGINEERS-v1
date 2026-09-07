@@ -1,19 +1,21 @@
-# Build stage
-FROM node:22-alpine AS builder
+# Install and build with the committed Bun lockfile for reproducible images.
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
-# Copy package manifests for efficient layer caching
-COPY package.json package-lock.json* bun.lock* ./
-RUN npm install
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-# Copy application sources
 COPY . .
+RUN bun run build
 
-# Build client SPA and backend server bundles into dist/
-RUN npm run build
+FROM oven/bun:1-alpine AS production-dependencies
 
-# Production runtime stage
+WORKDIR /app
+
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
+
 FROM node:22-alpine AS runner
 
 WORKDIR /app
@@ -21,18 +23,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Install production dependencies only
-COPY package.json package-lock.json* ./
-RUN npm install --omit=dev && npm cache clean --force
+COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
+COPY --chown=node:node package.json ./
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --from=builder --chown=node:node /app/public ./public
 
-# Copy compiled bundles and static assets
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/public ./public
-
-# Expose default HTTP port
 EXPOSE 3000
 
-# Use unprivileged node user
 USER node
 
 CMD ["node", "dist/server.cjs"]

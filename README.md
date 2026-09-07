@@ -67,6 +67,22 @@ npm run build
 npm start
 ```
 
+### 4. Docker Hub Publishing
+
+The GitHub Actions workflow in `.github/workflows/docker-publish.yml` validates the application and publishes a multi-platform image to `bethuelm/audrin-fire-engineers-v1` when code is pushed to `main`, a version tag such as `v1.0.0` is pushed, or the workflow is started manually.
+
+Add these repository secrets under **Settings → Secrets and variables → Actions**:
+
+- `DOCKERHUB_USERNAME`: your Docker Hub username (`bethuelm`)
+- `DOCKERHUB_TOKEN`: a Docker Hub personal access token with read/write permission
+
+Pull and run the published image:
+
+```bash
+docker pull bethuelm/audrin-fire-engineers-v1:latest
+docker run --rm -p 3000:3000 --env-file .env bethuelm/audrin-fire-engineers-v1:latest
+```
+
 ---
 
 ## 📋 Standards & Statutory References
