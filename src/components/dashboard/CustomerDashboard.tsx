@@ -33,6 +33,7 @@ import { SansDeviceLegendInspector } from '../compliance/SansDeviceLegendInspect
 import { ComplianceStatusBadge } from './ComplianceStatusBadge';
 import { ConditionReport, PowerPointPresentation, AiMeetingMinutes, ServiceRequest, SansCocCertificate } from '../../types';
 import { HOW_WE_WORK_STAGES } from '../../data/initialData';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface CustomerDashboardProps {
   onRequestService: () => void;
@@ -73,7 +74,12 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     <div className="min-h-screen bg-[#0A0A0B] text-white py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 p-7 rounded-3xl bg-[#151518] border border-white/5 shadow-2xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-5 p-7 rounded-3xl bg-[#151518] border border-white/5 shadow-2xl"
+        >
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="text-[10px] font-bold text-[#C1A461] uppercase tracking-[1.5px]">
@@ -102,48 +108,48 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onReportFault}
-              className="px-4 py-2.5 bg-[#0A0A0B] hover:bg-[#1E1E22] border border-red-500/30 text-red-300 text-xs font-bold uppercase tracking-wider rounded-xl transition flex items-center gap-2"
+              className="px-4 py-2.5 bg-[#0A0A0B] hover:bg-[#1E1E22] border border-red-500/30 text-red-300 text-xs font-bold uppercase tracking-wider rounded-xl transition flex items-center gap-2 cursor-pointer"
             >
               <ShieldAlert className="w-4 h-4 text-red-400" />
               <span>Report Fault</span>
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onRequestService}
-              className="px-5 py-2.5 bg-[#C1A461] hover:bg-[#D4BC7B] text-black text-xs font-bold uppercase tracking-[1.5px] rounded-xl shadow-lg shadow-black/40 transition flex items-center gap-2"
+              className="px-5 py-2.5 bg-[#C1A461] hover:bg-[#D4BC7B] text-black text-xs font-bold uppercase tracking-[1.5px] rounded-xl shadow-lg shadow-black/40 transition flex items-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>New Request</span>
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Quick Stats Bento Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-5 rounded-3xl bg-[#151518] border border-white/5 space-y-1">
-            <div className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Active Requests</div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">{requests.length}</div>
-            <div className="text-[10px] text-[#C1A461] font-mono">1 Scheduled • 1 Completed</div>
-          </div>
-
-          <div className="p-5 rounded-3xl bg-[#151518] border border-white/5 space-y-1">
-            <div className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Registered Facilities</div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">{sites.length}</div>
-            <div className="text-[10px] text-white/40 font-mono">Commercial Towers & Hubs</div>
-          </div>
-
-          <div className="p-5 rounded-3xl bg-[#151518] border border-white/5 space-y-1">
-            <div className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Audited Reports</div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">{reports.length}</div>
-            <div className="text-[10px] text-emerald-400 font-mono">Pre & Post Condition PDFs</div>
-          </div>
-
-          <div className="p-5 rounded-3xl bg-[#151518] border border-white/5 space-y-1">
-            <div className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Field Evidence</div>
-            <div className="text-2xl sm:text-3xl font-bold text-white">{photos.length}</div>
-            <div className="text-[10px] text-cyan-400 font-mono">Hashed Photos & Videos</div>
-          </div>
+          {[
+            { label: 'Active Requests', value: requests.length, sub: '1 Scheduled • 1 Completed', color: 'text-[#C1A461]' },
+            { label: 'Registered Facilities', value: sites.length, sub: 'Commercial Towers & Hubs', color: 'text-white/40' },
+            { label: 'Audited Reports', value: reports.length, sub: 'Pre & Post Condition PDFs', color: 'text-emerald-400' },
+            { label: 'Field Evidence', value: photos.length, sub: 'Hashed Photos & Videos', color: 'text-cyan-400' }
+          ].map((stat, idx) => (
+            <motion.div 
+              key={stat.label}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: idx * 0.06 }}
+              whileHover={{ y: -3, transition: { duration: 0.2 } }}
+              className="p-5 rounded-3xl bg-[#151518] border border-white/5 space-y-1 shadow-lg"
+            >
+              <div className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">{stat.label}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
+              <div className={`text-[10px] ${stat.color} font-mono`}>{stat.sub}</div>
+            </motion.div>
+          ))}
         </div>
 
         {/* Navigation Tabs */}
@@ -158,8 +164,10 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
           ].map((tab) => {
             const Icon = tab.icon;
             return (
-              <button
+              <motion.button
                 key={tab.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider font-bold whitespace-nowrap transition cursor-pointer ${
                   activeTab === tab.id
@@ -169,13 +177,22 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
-        {/* Tab 1: Requests & Workflow */}
-        {activeTab === 'requests' && (
+        {/* Tab Contents with Fluid AnimatePresence */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            {/* Tab 1: Requests & Workflow */}
+            {activeTab === 'requests' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
               {requests.map((req) => {
@@ -725,6 +742,8 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
 
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Modals */}

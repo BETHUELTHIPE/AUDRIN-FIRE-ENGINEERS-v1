@@ -4,14 +4,13 @@ import {
   Radio, 
   Play, 
   ArrowRight, 
-  FileText, 
   ShieldCheck, 
-  HelpCircle,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
 import { HOW_WE_WORK_STAGES } from '../../data/initialData';
 import { VoiceAiEngine } from '../../services/voiceAi';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface HowWeWorkTimelineProps {
   onOpenVoiceAi?: () => void;
@@ -65,99 +64,137 @@ export const HowWeWorkTimeline: React.FC<HowWeWorkTimelineProps> = ({
         {/* Desktop Horizontal Stepper Bar */}
         <div className="hidden lg:block mb-10">
           <div className="relative flex items-center justify-between">
-            {/* Connecting line */}
-            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/5 -translate-y-1/2 z-0" />
+            {/* Background track line */}
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-white/5 -translate-y-1/2 z-0 rounded-full" />
+            
+            {/* Animated active progress bar */}
+            <motion.div 
+              className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-[#C1A461] to-[#E3CD96] -translate-y-1/2 z-0 rounded-full"
+              initial={false}
+              animate={{ width: `${(activeStep / (HOW_WE_WORK_STAGES.length - 1)) * 100}%` }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            />
 
-            {HOW_WE_WORK_STAGES.map((stage, idx) => (
-              <button
-                key={stage.stepNumber}
-                onClick={() => setActiveStep(idx)}
-                className="relative z-10 flex flex-col items-center group transition focus:outline-none cursor-pointer"
-              >
-                <div 
-                  className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-xs border transition duration-300 ${
-                    idx === activeStep 
-                      ? 'bg-[#C1A461] border-[#D4BC7B] text-black shadow-xl shadow-black/60 scale-110' 
-                      : 'bg-[#151518] border-white/5 text-white/50 group-hover:border-white/20 group-hover:text-white'
-                  }`}
+            {HOW_WE_WORK_STAGES.map((stage, idx) => {
+              const isSelected = idx === activeStep;
+              const isPassed = idx < activeStep;
+
+              return (
+                <motion.button
+                  key={stage.stepNumber}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setActiveStep(idx)}
+                  className="relative z-10 flex flex-col items-center group transition focus:outline-none cursor-pointer"
                 >
-                  0{stage.stepNumber}
-                </div>
-                <span className={`mt-3 text-[11px] uppercase tracking-wider font-semibold text-center max-w-[120px] line-clamp-1 ${
-                  idx === activeStep ? 'text-[#C1A461] font-bold' : 'text-white/40 group-hover:text-white/70'
-                }`}>
-                  {stage.title}
-                </span>
-              </button>
-            ))}
+                  <div 
+                    className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-xs border transition-all duration-300 ${
+                      isSelected 
+                        ? 'bg-[#C1A461] border-[#D4BC7B] text-black shadow-xl shadow-[#C1A461]/25 scale-110' 
+                        : isPassed
+                        ? 'bg-[#1A1A1E] border-[#C1A461]/50 text-[#C1A461]'
+                        : 'bg-[#151518] border-white/5 text-white/50 group-hover:border-white/20 group-hover:text-white'
+                    }`}
+                  >
+                    0{stage.stepNumber}
+                  </div>
+                  <span className={`mt-3 text-[11px] uppercase tracking-wider font-semibold text-center max-w-[120px] line-clamp-1 transition-colors duration-200 ${
+                    isSelected ? 'text-[#C1A461] font-bold' : 'text-white/40 group-hover:text-white/70'
+                  }`}>
+                    {stage.title}
+                  </span>
+                </motion.button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Selected Stage Detail Card (Desktop) */}
-        <div className="hidden lg:grid grid-cols-12 gap-8 p-9 rounded-3xl bg-[#151518] border border-white/5 shadow-2xl items-center">
-          <div className="col-span-8 space-y-5">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-[#C1A461] uppercase tracking-widest">
-                Stage 0{HOW_WE_WORK_STAGES[activeStep].stepNumber} of 07
-              </span>
-              <span className="text-[10px] uppercase tracking-wider bg-[#0A0A0B] text-white/50 px-3 py-1 rounded-full font-mono border border-white/5">
-                {HOW_WE_WORK_STAGES[activeStep].sansStandardNote}
-              </span>
-            </div>
+        {/* Selected Stage Detail Card (Desktop) with AnimatePresence */}
+        <div className="hidden lg:block relative min-h-[360px]">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={activeStep}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="grid grid-cols-12 gap-8 p-9 rounded-3xl bg-[#151518] border border-white/5 shadow-2xl items-center"
+            >
+              <div className="col-span-8 space-y-5">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-[#C1A461] uppercase tracking-widest">
+                    Stage 0{HOW_WE_WORK_STAGES[activeStep].stepNumber} of 07
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider bg-[#0A0A0B] text-white/50 px-3 py-1 rounded-full font-mono border border-white/5">
+                    {HOW_WE_WORK_STAGES[activeStep].sansStandardNote}
+                  </span>
+                </div>
 
-            <h3 className="text-2xl font-bold text-white tracking-tight">
-              {HOW_WE_WORK_STAGES[activeStep].title}
-            </h3>
+                <h3 className="text-2xl font-bold text-white tracking-tight">
+                  {HOW_WE_WORK_STAGES[activeStep].title}
+                </h3>
 
-            <p className="text-sm text-white/60 leading-relaxed font-normal">
-              {HOW_WE_WORK_STAGES[activeStep].fullDescription}
-            </p>
+                <p className="text-sm text-white/60 leading-relaxed font-normal">
+                  {HOW_WE_WORK_STAGES[activeStep].fullDescription}
+                </p>
 
-            {/* Deliverables List */}
-            <div className="pt-2">
-              <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">
-                Mandatory Stage Deliverables:
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {HOW_WE_WORK_STAGES[activeStep].deliverables.map((item, i) => (
-                  <div key={i} className="flex items-center gap-2.5 text-xs text-white/80 bg-[#0A0A0B] px-3.5 py-2.5 rounded-xl border border-white/5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#C1A461] shrink-0" />
-                    <span>{item}</span>
+                {/* Deliverables List */}
+                <div className="pt-2">
+                  <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">
+                    Mandatory Stage Deliverables:
                   </div>
-                ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {HOW_WE_WORK_STAGES[activeStep].deliverables.map((item, i) => (
+                      <motion.div 
+                        key={i} 
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        className="flex items-center gap-2.5 text-xs text-white/80 bg-[#0A0A0B] px-3.5 py-2.5 rounded-xl border border-white/5"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#C1A461] shrink-0" />
+                        <span>{item}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="col-span-4 p-7 rounded-2xl bg-[#0A0A0B] border border-white/5 space-y-5 flex flex-col justify-between h-full">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#C1A461]">
-                <Radio className="w-4 h-4" />
-                <span>Audio Stage Narration</span>
+              <div className="col-span-4 p-7 rounded-2xl bg-[#0A0A0B] border border-white/5 space-y-5 flex flex-col justify-between h-full">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#C1A461]">
+                    <Radio className="w-4 h-4" />
+                    <span>Audio Stage Narration</span>
+                  </div>
+                  <p className="text-xs text-white/50 leading-relaxed italic">
+                    "{HOW_WE_WORK_STAGES[activeStep].narrationScript}"
+                  </p>
+                </div>
+
+                <div className="space-y-2.5 pt-5 border-t border-white/5">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handlePlaySingleStep(activeStep)}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-[#151518] hover:bg-[#1E1E22] text-[#C1A461] border border-[#C1A461]/30 rounded-xl text-xs uppercase tracking-wider font-bold transition cursor-pointer"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Listen to Stage 0{HOW_WE_WORK_STAGES[activeStep].stepNumber}</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={onRequestService}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-[#C1A461] hover:bg-[#D4BC7B] text-black rounded-xl text-xs uppercase tracking-[1.5px] font-bold transition shadow-lg shadow-black/40 cursor-pointer"
+                  >
+                    <span>Initiate Stage Request</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </motion.button>
+                </div>
               </div>
-              <p className="text-xs text-white/50 leading-relaxed italic">
-                "{HOW_WE_WORK_STAGES[activeStep].narrationScript}"
-              </p>
-            </div>
-
-            <div className="space-y-2.5 pt-5 border-t border-white/5">
-              <button
-                onClick={() => handlePlaySingleStep(activeStep)}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-[#151518] hover:bg-[#1E1E22] text-[#C1A461] border border-[#C1A461]/30 rounded-xl text-xs uppercase tracking-wider font-bold transition"
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Listen to Stage 0{HOW_WE_WORK_STAGES[activeStep].stepNumber}</span>
-              </button>
-
-              <button
-                onClick={onRequestService}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-[#C1A461] hover:bg-[#D4BC7B] text-black rounded-xl text-xs uppercase tracking-[1.5px] font-bold transition shadow-lg shadow-black/40"
-              >
-                <span>Initiate Stage Request</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Mobile Vertical Stepper (Visible on Mobile & Tablet) */}

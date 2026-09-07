@@ -17,6 +17,7 @@ import {
 import { APPROVED_SERVICES, SITES_DATA, COMPANY_DETAILS } from '../../data/initialData';
 import { useAudrinStore } from '../../services/store';
 import { ServiceRequest, SystemCategory, UrgencyLevel } from '../../types';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface RequestServiceWizardProps {
   initialServiceSlug?: string;
@@ -156,7 +157,12 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
   if (submittedRequest) {
     return (
       <div className="min-h-screen bg-[#0A0A0B] text-white py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto rounded-3xl bg-[#151518] border border-white/5 p-8 sm:p-10 shadow-2xl space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl mx-auto rounded-3xl bg-[#151518] border border-white/5 p-8 sm:p-10 shadow-2xl space-y-6"
+        >
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6 text-emerald-400" />
@@ -210,20 +216,24 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
           </div>
 
           <div className="flex flex-wrap gap-4 pt-4 border-t border-white/5">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onSuccess(submittedRequest.id)}
               className="flex-1 py-3.5 bg-[#C1A461] hover:bg-[#D4BC7B] text-black font-bold uppercase tracking-wider text-xs rounded-xl shadow-lg text-center transition cursor-pointer"
             >
               Open Customer Portal Dashboard
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onCancel}
               className="py-3.5 px-6 bg-[#0A0A0B] hover:bg-[#1E1E22] text-white/70 hover:text-white font-bold uppercase tracking-wider text-xs rounded-xl border border-white/5 transition cursor-pointer"
             >
               Back to Home
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -259,15 +269,51 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
           </p>
         </div>
 
+        {/* Step Progress Bar */}
+        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+          {[
+            { num: 1, title: 'Client & Facility' },
+            { num: 2, title: 'System Specs' },
+            { num: 3, title: 'Scope & Date' },
+            { num: 4, title: 'Attestation & Submit' }
+          ].map((s) => {
+            const isActive = step === s.num;
+            const isDone = step > s.num;
+            return (
+              <div key={s.num} className="space-y-1.5">
+                <div className="h-1.5 rounded-full overflow-hidden bg-white/10">
+                  <motion.div
+                    className="h-full bg-[#C1A461]"
+                    initial={false}
+                    animate={{ width: isDone ? '100%' : isActive ? '100%' : '0%' }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+                <span className={`text-[10px] hidden sm:block font-semibold uppercase tracking-wider truncate ${isActive ? 'text-[#C1A461]' : isDone ? 'text-white/70' : 'text-white/30'}`}>
+                  0{s.num}. {s.title}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
         {/* Form Stepper Form Container */}
-        <form onSubmit={handleSubmit} className="p-7 sm:p-9 rounded-3xl bg-[#151518] border border-white/5 shadow-2xl space-y-8">
-          {/* Step 1: Client & Site Contact */}
-          {step === 1 && (
-            <div className="space-y-6">
-              <h3 className="text-base font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#C1A461]" />
-                <span>1. Client & Commercial Facility Details</span>
-              </h3>
+        <form onSubmit={handleSubmit} className="p-7 sm:p-9 rounded-3xl bg-[#151518] border border-white/5 shadow-2xl space-y-8 overflow-hidden">
+          <AnimatePresence mode="wait">
+            {/* Step 1: Client & Site Contact */}
+            {step === 1 && (
+              <motion.div 
+                key="step-1"
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -16 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-6"
+              >
+                <h3 className="text-base font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-[#C1A461]" />
+                  <span>1. Client & Commercial Facility Details</span>
+                </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
@@ -347,12 +393,19 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
                   />
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Step 2: Service & Panel Technical Parameters */}
           {step === 2 && (
-            <div className="space-y-6">
+            <motion.div 
+              key="step-2"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
               <h3 className="text-base font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
                 <Flame className="w-5 h-5 text-[#C1A461]" />
                 <span>2. Service Classification & Existing Fire System</span>
@@ -442,12 +495,19 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
                   />
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Step 3: Scheduling, Urgency & File Upload */}
           {step === 3 && (
-            <div className="space-y-6">
+            <motion.div 
+              key="step-3"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
               <h3 className="text-base font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-[#C1A461]" />
                 <span>3. Preferred Schedule, Urgency & Document Upload</span>
@@ -545,12 +605,19 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Step 4: Consent & Review */}
           {step === 4 && (
-            <div className="space-y-6">
+            <motion.div 
+              key="step-4"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
               <h3 className="text-base font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-[#C1A461]" />
                 <span>4. Scope Acknowledgment, POPIA Consent & Review</span>
@@ -604,40 +671,49 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
                   </span>
                 </label>
               </div>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
 
           {/* Stepper Navigation Buttons */}
           <div className="flex items-center justify-between pt-6 border-t border-white/5">
             {step > 1 ? (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => setStep(step - 1)}
                 className="px-5 py-3 bg-[#0A0A0B] hover:bg-[#1E1E22] text-white/70 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-white/5 transition cursor-pointer"
               >
                 Previous Step
-              </button>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={onCancel}
                 className="px-5 py-3 bg-[#0A0A0B] hover:bg-[#1E1E22] text-white/40 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-white/5 transition cursor-pointer"
               >
                 Cancel
-              </button>
+              </motion.button>
             )}
 
             {step < 4 ? (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => setStep(step + 1)}
                 className="flex items-center gap-2 px-6 py-3 bg-[#C1A461] hover:bg-[#D4BC7B] text-black font-bold uppercase tracking-wider text-xs rounded-xl transition shadow-lg cursor-pointer"
               >
                 <span>Continue</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isSubmitting || !formData.consentScopeExclusions || !formData.consentDataProcessing}
                 className="flex items-center gap-2 px-6 py-3.5 bg-[#C1A461] hover:bg-[#D4BC7B] disabled:opacity-40 text-black font-bold uppercase tracking-wider text-xs rounded-xl transition shadow-xl cursor-pointer"
@@ -650,7 +726,7 @@ export const RequestServiceWizard: React.FC<RequestServiceWizardProps> = ({
                     <span>Submit & Generate Tailored Acknowledgement</span>
                   </>
                 )}
-              </button>
+              </motion.button>
             )}
           </div>
         </form>

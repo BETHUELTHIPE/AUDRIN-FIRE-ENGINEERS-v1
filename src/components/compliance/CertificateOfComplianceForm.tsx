@@ -32,8 +32,13 @@ import {
   ChevronRight,
   ChevronLeft,
   RotateCw,
-  History
+  History,
+  Cpu,
+  Database,
+  Sparkles,
+  Radio
 } from 'lucide-react';
+import { SyncDeviceInventoryModal, SyncCurrentValues } from './SyncDeviceInventoryModal';
 
 interface CertificateOfComplianceFormProps {
   isOpen: boolean;
@@ -154,6 +159,104 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
   const [autoEmailOnIssue, setAutoEmailOnIssue] = useState(true);
   const [isIssuingAndEmailing, setIsIssuingAndEmailing] = useState(false);
   const [issueNotice, setIssueNotice] = useState<string | null>(null);
+
+  // Hardware Inventory Sync State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [lastInventorySyncRef, setLastInventorySyncRef] = useState<string | null>(existingCoc ? 'INV-MEN-2026-0842' : null);
+  const [lastInventorySyncTime, setLastInventorySyncTime] = useState<string | null>(existingCoc ? 'Baseline' : null);
+  const [syncToastMessage, setSyncToastMessage] = useState<string | null>(null);
+
+  // Associated Project Hardware Inventory
+  const linkedProjectInventory = useMemo(() => {
+    return store.getProjectHardwareInventory(projectRef || activeSite.id);
+  }, [store, projectRef, activeSite.id]);
+
+  // Direct Auto-Sync Device Inventory Handler
+  const handleAutoSyncDeviceInventory = () => {
+    const inv = linkedProjectInventory || store.getProjectHardwareInventory();
+    if (!inv) {
+      setSyncToastMessage('No hardware inventory record found for this project.');
+      setTimeout(() => setSyncToastMessage(null), 4000);
+      return;
+    }
+
+    const panel = inv.panelDetails;
+    const summary = inv.deviceScheduleSummary;
+
+    setPanelBrand(panel.brand);
+    setPanelModel(panel.model);
+    setPanelSerial(panel.serialNumber);
+    setPanelLocation(panel.location);
+    setLoopCount(panel.loopCount);
+    setZoneCount(panel.zoneCount || inv.zones.length);
+
+    setBlueDotSmoke(summary.blueDotSmokeDetectors);
+    setBlackDotHeat(summary.blackDotHeatDetectors);
+    setRedDotSounders(summary.redDotSoundersSirens);
+    setGreenDotMcp(summary.greenDotManualCallPoints);
+    setMultiSensors(summary.multiSensorDetectors);
+    setBeamSensors(summary.opticalBeamDetectors);
+    setAspiratingPoints(summary.aspiratingSamplingPoints);
+
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setLastInventorySyncRef(inv.inventoryRef);
+    setLastInventorySyncTime(now);
+
+    setSyncToastMessage(
+      `✓ Successfully synchronized ${panel.loopCount} Loops, ${panel.zoneCount || inv.zones.length} Zones, and ${summary.totalDeviceCount} Devices from ${inv.inventoryRef} (${inv.siteName})`
+    );
+    setTimeout(() => setSyncToastMessage(null), 6000);
+
+    store.logAudit(
+      'SANS_10139_INVENTORY_SYNC',
+      'CertificateOfComplianceForm',
+      inv.inventoryRef,
+      `Hardware Inventory synchronized into COC: ${panel.loopCount} Loops, ${panel.zoneCount} Zones, ${summary.totalDeviceCount} Devices (Ref: ${inv.inventoryRef}).`
+    );
+  };
+
+  // Modal Sync Callback
+  const handleApplyModalSync = (syncedData: SyncCurrentValues & { inventoryRef: string; auditDate: string; auditor: string }) => {
+    setPanelBrand(syncedData.panelBrand);
+    setPanelModel(syncedData.panelModel);
+    setPanelSerial(syncedData.panelSerial);
+    setPanelLocation(syncedData.panelLocation);
+    setLoopCount(syncedData.loopCount);
+    setZoneCount(syncedData.zoneCount);
+
+    setBlueDotSmoke(syncedData.blueDotSmoke);
+    setBlackDotHeat(syncedData.blackDotHeat);
+    setRedDotSounders(syncedData.redDotSounders);
+    setGreenDotMcp(syncedData.greenDotMcp);
+    setMultiSensors(syncedData.multiSensors);
+    setBeamSensors(syncedData.beamSensors);
+    setAspiratingPoints(syncedData.aspiratingPoints);
+
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setLastInventorySyncRef(syncedData.inventoryRef);
+    setLastInventorySyncTime(now);
+
+    const totalDevs = 
+      syncedData.blueDotSmoke +
+      syncedData.blackDotHeat +
+      syncedData.redDotSounders +
+      syncedData.greenDotMcp +
+      syncedData.multiSensors +
+      syncedData.beamSensors +
+      syncedData.aspiratingPoints;
+
+    setSyncToastMessage(
+      `✓ Applied hardware inventory synchronization: ${syncedData.loopCount} Loops, ${syncedData.zoneCount} Zones & ${totalDevs} Devices from ${syncedData.inventoryRef}`
+    );
+    setTimeout(() => setSyncToastMessage(null), 6000);
+
+    store.logAudit(
+      'SANS_10139_INVENTORY_SYNC',
+      'CertificateOfComplianceForm',
+      syncedData.inventoryRef,
+      `Detailed hardware inventory sync applied to COC from ${syncedData.inventoryRef} (${syncedData.auditor}): ${syncedData.loopCount} Loops, ${syncedData.zoneCount} Zones, ${totalDevs} Devices.`
+    );
+  };
 
   // Check Commissioner Registration Expiry
   const isCommissionerExpired = useMemo(() => {
@@ -677,6 +780,23 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
               </button>
             );
           })}
+
+          <div className="ml-auto flex items-center gap-2 pl-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsSyncModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-[#C1A461]/15 hover:bg-[#C1A461]/25 text-[#C1A461] border border-[#C1A461]/30 font-mono text-[11px] font-bold whitespace-nowrap flex items-center gap-1.5 transition cursor-pointer"
+              title="Open SyncDeviceInventory utility to inspect and pull hardware records"
+            >
+              <RotateCw className="w-3 h-3" />
+              <span>Sync Inventory</span>
+              {lastInventorySyncRef ? (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Synchronized" />
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" title="Sync Available" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Validation Warning Alert */}
@@ -694,6 +814,22 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <div className="flex-1 font-mono text-[11px] leading-relaxed">{issueNotice}</div>
             <button onClick={() => setIssueNotice(null)} className="text-emerald-400 hover:text-white">✕</button>
+          </div>
+        )}
+
+        {/* Hardware Inventory Sync Toast Notification */}
+        {syncToastMessage && (
+          <div className="px-6 py-3 bg-gradient-to-r from-[#C1A461]/20 via-[#1C1C24] to-black border-b border-[#C1A461]/40 text-xs text-[#C1A461] flex items-center justify-between gap-3 shrink-0 animate-in fade-in">
+            <div className="flex items-center gap-2.5 font-mono text-[11px]">
+              <Database className="w-4 h-4 text-[#C1A461] shrink-0" />
+              <span>{syncToastMessage}</span>
+            </div>
+            <button 
+              onClick={() => setSyncToastMessage(null)} 
+              className="text-[#C1A461]/70 hover:text-white font-bold p-1 cursor-pointer"
+            >
+              ✕
+            </button>
           </div>
         )}
 
@@ -999,19 +1135,75 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                 </div>
               )}
 
-              {/* Panel Details */}
-              <div className="p-4 bg-black/40 border border-white/10 rounded-2xl space-y-3">
-                <div className="font-bold text-xs text-[#C1A461] uppercase tracking-wider font-mono">
-                  Control Panel Specifications
+              {/* SyncDeviceInventory Utility Bar */}
+              <div className="p-4 bg-gradient-to-r from-black/90 via-[#181824] to-black/90 border border-[#C1A461]/40 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl shadow-black/50">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-[#C1A461]/20 text-[#C1A461] rounded-full border border-[#C1A461]/40 flex items-center gap-1">
+                      <Database className="w-3 h-3" />
+                      SyncDeviceInventory Utility
+                    </span>
+                    {linkedProjectInventory && (
+                      <span className="text-[11px] font-mono text-white/80">
+                        Asset Record: <strong className="text-[#C1A461]">{linkedProjectInventory.inventoryRef}</strong> &middot; {linkedProjectInventory.siteName}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-white/60">
+                    Pulls addressable loop circuits, detection zone schedules, and 7-category device counts directly from project hardware inventory records.
+                  </p>
+                  {lastInventorySyncRef && (
+                    <div className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 pt-0.5">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      Hardware data synchronized with {lastInventorySyncRef} {lastInventorySyncTime ? `(${lastInventorySyncTime})` : ''}
+                    </div>
+                  )}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleAutoSyncDeviceInventory}
+                    className="px-3.5 py-2 bg-gradient-to-r from-[#C1A461] to-[#D4B774] text-black font-mono font-bold text-xs rounded-xl hover:opacity-90 transition flex items-center gap-1.5 shadow-md shadow-[#C1A461]/20 cursor-pointer"
+                    title="Automatically pull all hardware inventory loops, zones, and device counts into the form"
+                  >
+                    <RotateCw className="w-3.5 h-3.5" />
+                    Auto-Pull Inventory
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsSyncModalOpen(true)}
+                    className="px-3.5 py-2 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-mono text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+                    title="Inspect hardware asset inventory, diff against current values, and selective sync"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-[#C1A461]" />
+                    Inspect &amp; Diff Sync...
+                  </button>
+                </div>
+              </div>
+
+              {/* Panel Details & Circuits */}
+              <div className="p-4 bg-black/40 border border-white/10 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-xs text-[#C1A461] uppercase tracking-wider font-mono flex items-center gap-2">
+                    <Cpu className="w-3.5 h-3.5" />
+                    Control Panel &amp; Circuit Architecture
+                  </div>
+                  {lastInventorySyncRef && (
+                    <span className="text-[10px] font-mono text-white/50">
+                      Circuits matched to {lastInventorySyncRef}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-[11px] font-mono text-white/60 mb-1">Make / Brand</label>
                     <input
                       type="text"
                       value={panelBrand}
                       onChange={e => setPanelBrand(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white focus:border-[#C1A461] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -1020,7 +1212,7 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                       type="text"
                       value={panelModel}
                       onChange={e => setPanelModel(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white focus:border-[#C1A461] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -1029,7 +1221,7 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                       type="text"
                       value={panelSerial}
                       onChange={e => setPanelSerial(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white focus:border-[#C1A461] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -1038,7 +1230,35 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                       type="text"
                       value={panelLocation}
                       onChange={e => setPanelLocation(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono text-white focus:border-[#C1A461] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-mono text-purple-300 mb-1 flex items-center justify-between">
+                      <span>Addressable Loops Count</span>
+                      <span className="text-[10px] text-white/40 font-normal">Pulled from Inventory</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={32}
+                      value={loopCount}
+                      onChange={e => setLoopCount(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-1.5 bg-black/60 border border-purple-500/30 rounded-xl text-xs font-mono text-purple-200 font-bold focus:border-purple-400 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-mono text-emerald-300 mb-1 flex items-center justify-between">
+                      <span>Detection Zones Count</span>
+                      <span className="text-[10px] text-white/40 font-normal">Pulled from Inventory</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={256}
+                      value={zoneCount}
+                      onChange={e => setZoneCount(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-1.5 bg-black/60 border border-emerald-500/30 rounded-xl text-xs font-mono text-emerald-200 font-bold focus:border-emerald-400 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1047,8 +1267,22 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
               {/* Device Counts per Dot Legend */}
               <div className="space-y-3">
                 <div className="font-bold text-xs text-white uppercase tracking-wider font-mono flex items-center justify-between">
-                  <span>Device Schedule (SANS 10139 Color Coded Legend)</span>
-                  <span className="text-[10px] text-white/50">Question 22</span>
+                  <div className="flex items-center gap-2">
+                    <span>Device Schedule (SANS 10139 Color Coded Legend)</span>
+                    <span className="text-[10px] font-normal text-white/50 font-sans">(Question 22)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-white/60">
+                      Total Devices: <strong className="text-[#C1A461]">{blueDotSmoke + blackDotHeat + redDotSounders + greenDotMcp + multiSensors + beamSensors + aspiratingPoints}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleAutoSyncDeviceInventory}
+                      className="text-[10px] font-mono text-[#C1A461] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <RotateCw className="w-2.5 h-2.5" /> Re-sync
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1061,7 +1295,7 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                       type="number"
                       value={blueDotSmoke}
                       onChange={e => setBlueDotSmoke(parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-blue-500/20 rounded-lg text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-blue-500/20 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-blue-400"
                     />
                   </div>
 
@@ -1074,7 +1308,7 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                       type="number"
                       value={blackDotHeat}
                       onChange={e => setBlackDotHeat(parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-white/20 rounded-lg text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-white/20 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-white/50"
                     />
                   </div>
 
@@ -1087,7 +1321,7 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                       type="number"
                       value={redDotSounders}
                       onChange={e => setRedDotSounders(parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-red-500/20 rounded-lg text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-red-500/20 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-red-400"
                     />
                   </div>
 
@@ -1100,8 +1334,59 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
                       type="number"
                       value={greenDotMcp}
                       onChange={e => setGreenDotMcp(parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-1.5 bg-black/60 border border-emerald-500/20 rounded-lg text-xs font-mono text-white"
+                      className="w-full px-3 py-1.5 bg-black/60 border border-emerald-500/20 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-emerald-400"
                     />
+                  </div>
+
+                  <div className="p-3 bg-purple-950/20 border border-purple-500/30 rounded-xl">
+                    <label className="block text-[11px] font-mono text-purple-300 font-bold mb-1 flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+                      Purple: Multi-Sensors
+                    </label>
+                    <input
+                      type="number"
+                      value={multiSensors}
+                      onChange={e => setMultiSensors(parseInt(e.target.value) || 0)}
+                      className="w-full px-3 py-1.5 bg-black/60 border border-purple-500/20 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-purple-400"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-amber-950/20 border border-amber-500/30 rounded-xl">
+                    <label className="block text-[11px] font-mono text-amber-300 font-bold mb-1 flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                      Amber: Optical Beams
+                    </label>
+                    <input
+                      type="number"
+                      value={beamSensors}
+                      onChange={e => setBeamSensors(parseInt(e.target.value) || 0)}
+                      className="w-full px-3 py-1.5 bg-black/60 border border-amber-500/20 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-cyan-950/20 border border-cyan-500/30 rounded-xl">
+                    <label className="block text-[11px] font-mono text-cyan-300 font-bold mb-1 flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
+                      Cyan: Aspirating Points
+                    </label>
+                    <input
+                      type="number"
+                      value={aspiratingPoints}
+                      onChange={e => setAspiratingPoints(parseInt(e.target.value) || 0)}
+                      className="w-full px-3 py-1.5 bg-black/60 border border-cyan-500/20 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-gradient-to-br from-black/80 to-[#1E1B12] border border-[#C1A461]/40 rounded-xl flex flex-col justify-between">
+                    <span className="block text-[11px] font-mono text-[#C1A461] font-bold">
+                      Total Schedule Devices
+                    </span>
+                    <div className="flex items-baseline justify-between pt-1">
+                      <span className="text-[10px] font-mono text-white/50">All 7 Categories</span>
+                      <span className="text-lg font-bold font-mono text-[#C1A461]">
+                        {blueDotSmoke + blackDotHeat + redDotSounders + greenDotMcp + multiSensors + beamSensors + aspiratingPoints}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1541,6 +1826,31 @@ export const CertificateOfComplianceForm: React.FC<CertificateOfComplianceFormPr
         onClose={() => setPdfExportModalOpen(false)}
         coc={currentWorkingCoc}
         defaultIsDraft={isFormDraft}
+      />
+
+      {/* Hardware Asset Inventory Sync Utility Modal */}
+      <SyncDeviceInventoryModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        activeSiteId={activeSite.id}
+        projectRef={projectRef}
+        siteName={siteName}
+        currentValues={{
+          panelBrand,
+          panelModel,
+          panelSerial,
+          panelLocation,
+          loopCount,
+          zoneCount,
+          blueDotSmoke,
+          blackDotHeat,
+          redDotSounders,
+          greenDotMcp,
+          multiSensors,
+          beamSensors,
+          aspiratingPoints
+        }}
+        onApplySync={handleApplyModalSync}
       />
     </div>
   );

@@ -1519,5 +1519,92 @@ export interface ProjectHistoryExportResult {
   errorMessage?: string;
 }
 
+// ============================================================================
+// HARDWARE INVENTORY & ASSET REGISTRY TYPES
+// ============================================================================
 
+export type HardwareDeviceType =
+  | 'optical_smoke'
+  | 'heat_detector'
+  | 'sounder_siren'
+  | 'manual_call_point'
+  | 'multi_sensor'
+  | 'optical_beam'
+  | 'aspirating_point'
+  | 'interface_module'
+  | 'control_panel'
+  | 'loop_expander'
+  | 'power_supply';
 
+export interface HardwareDeviceItem {
+  id: string;
+  deviceType: HardwareDeviceType;
+  tag: string; // e.g. "L1-D001"
+  zoneNumber: number; // e.g. 1
+  zoneName: string; // e.g. "Zone 1: Ground Floor Reception"
+  loopNumber: number; // e.g. 1
+  addressOnLoop: number; // e.g. 1
+  make: string; // e.g. "Apollo"
+  model: string; // e.g. "Discovery Optical Smoke (58000-600)"
+  serialNumber: string;
+  locationDescription: string;
+  installedDate: string;
+  status: 'operational' | 'in_service' | 'isolated' | 'fault';
+  lastTestedDate?: string;
+  complianceCode: 'blue_dot' | 'black_dot' | 'red_dot' | 'green_dot' | 'purple_dot' | 'amber_dot' | 'cyan_dot';
+}
+
+export interface ZoneInventoryItem {
+  zoneNumber: number;
+  zoneName: string;
+  floorOrArea: string;
+  deviceCount: number;
+  description?: string;
+}
+
+export interface LoopInventoryItem {
+  loopNumber: number;
+  loopProtocol: string;
+  activeDevicesCount: number;
+  maxLoopCapacity: number;
+  cableLengthMeters?: number;
+  classAVerified: boolean;
+}
+
+export interface ProjectHardwareInventory {
+  id: string;
+  projectId: string; // matches projectReference or siteId
+  projectReference: string; // e.g. "PRJ-AFE-2026-0842"
+  siteId: string;
+  siteName: string;
+  lastAuditDate: string;
+  auditedBy: string;
+  auditorSaqccNumber?: string;
+  inventoryRef: string; // e.g. "INV-MEN-2026-0842"
+  panelDetails: {
+    brand: string;
+    model: string;
+    serialNumber: string;
+    location: string;
+    loopCount: number;
+    zoneCount: number;
+    powerSupplyModel?: string;
+    standbyBatteryAh?: number;
+  };
+  zones: ZoneInventoryItem[];
+  loops: LoopInventoryItem[];
+  deviceScheduleSummary: {
+    blueDotSmokeDetectors: number;
+    blackDotHeatDetectors: number;
+    redDotSoundersSirens: number;
+    greenDotManualCallPoints: number;
+    multiSensorDetectors: number;
+    opticalBeamDetectors: number;
+    aspiratingSamplingPoints: number;
+    totalDeviceCount: number;
+  };
+  deviceRecords: HardwareDeviceItem[];
+  notes?: string;
+}
+
+export type GlobalTheme = 'light' | 'dark';

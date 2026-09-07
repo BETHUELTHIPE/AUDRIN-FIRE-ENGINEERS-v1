@@ -14,6 +14,7 @@ import {
 import { useAudrinStore } from '../../services/store';
 import { COMPANY_DETAILS } from '../../data/initialData';
 import { ServiceRequest } from '../../types';
+import { motion } from 'motion/react';
 
 interface ReportFaultWizardProps {
   onCancel: () => void;
@@ -123,7 +124,12 @@ export const ReportFaultWizard: React.FC<ReportFaultWizardProps> = ({
   if (submittedFault) {
     return (
       <div className="min-h-screen bg-[#0A0A0B] text-white py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto rounded-3xl bg-[#151518] border border-red-500/30 p-8 sm:p-10 shadow-2xl space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl mx-auto rounded-3xl bg-[#151518] border border-red-500/30 p-8 sm:p-10 shadow-2xl space-y-6"
+        >
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center">
               <ShieldAlert className="w-6 h-6 text-red-400 animate-pulse" />
@@ -159,44 +165,56 @@ export const ReportFaultWizard: React.FC<ReportFaultWizardProps> = ({
               </p>
             </div>
 
-            <a
+            <motion.a
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               href={`tel:${COMPANY_DETAILS.phone}`}
               className="flex items-center gap-2 px-5 py-3 bg-[#C1A461] hover:bg-[#D4BC7B] text-black font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition shrink-0 shadow-lg cursor-pointer"
             >
               <PhoneCall className="w-4 h-4" />
               <span>{COMPANY_DETAILS.phone}</span>
-            </a>
+            </motion.a>
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-white/5">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onSuccess(submittedFault.id)}
               className="flex-1 py-3.5 bg-[#C1A461] hover:bg-[#D4BC7B] text-black font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg text-center transition cursor-pointer"
             >
               Open Fault Tracker in Customer Portal
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onCancel}
               className="py-3.5 px-6 bg-[#0A0A0B] hover:bg-[#1E1E22] text-white/70 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-white/5 transition cursor-pointer"
             >
               Back to Home
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto space-y-8">
-        <button
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-3xl mx-auto space-y-8"
+      >
+        <motion.button
+          whileHover={{ x: -2 }}
           onClick={onCancel}
           className="flex items-center gap-2 text-xs uppercase tracking-wider font-bold text-white/40 hover:text-[#C1A461] transition cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>
-        </button>
+        </motion.button>
 
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-[10px] font-bold text-red-400 uppercase tracking-wider">
@@ -368,16 +386,18 @@ export const ReportFaultWizard: React.FC<ReportFaultWizardProps> = ({
             </span>
           </label>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
             type="submit"
             disabled={isSubmitting}
             className="w-full py-4 bg-[#C1A461] hover:bg-[#D4BC7B] text-black font-bold uppercase tracking-[1.5px] text-xs rounded-xl shadow-xl transition flex items-center justify-center gap-2 cursor-pointer"
           >
             <ShieldAlert className="w-4 h-4" />
             <span>{isSubmitting ? 'Logging Fault Ticket...' : 'Submit Emergency Fault Report'}</span>
-          </button>
+          </motion.button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 };

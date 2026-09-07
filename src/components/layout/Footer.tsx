@@ -12,6 +12,7 @@ import {
   FileCheck2
 } from 'lucide-react';
 import { COMPANY_DETAILS } from '../../data/initialData';
+import { AudrinLogo } from '../common/AudrinLogo';
 
 interface FooterProps {
   onNavigate: (view: string, param?: string) => void;
@@ -65,13 +66,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenInfra, onSelec
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Column 1: Company Profile */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-[#151518] border border-[#C1A461]/40 flex items-center justify-center">
-                <Flame className="w-4 h-4 text-[#C1A461]" />
-              </div>
-              <span className="font-bold text-lg text-white tracking-tighter">
-                AUDRIN<span className="text-[#C1A461]">.</span> FIRE
-              </span>
+            <div 
+              onClick={() => onNavigate('home')} 
+              className="cursor-pointer inline-block"
+              title="AUDRIN FIRE ENGINEERS"
+            >
+              <AudrinLogo variant="full" size="md" />
             </div>
             <p className="text-xs text-[#C1A461] font-semibold uppercase tracking-wider">
               {COMPANY_DETAILS.tagline}

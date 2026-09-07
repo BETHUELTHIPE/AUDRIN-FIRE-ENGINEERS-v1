@@ -9,7 +9,8 @@ import {
   ZoomMeetingDetails, 
   AiMeetingMinutes,
   SansLogbookEntry,
-  SansCocCertificate
+  SansCocCertificate,
+  ProjectHardwareInventory
 } from '../types';
 
 export const COMPANY_DETAILS = {
@@ -1647,5 +1648,173 @@ export const INITIAL_SANS_COCS: SansCocCertificate[] = [
     signatureHash: '',
     certificateStatus: 'Draft',
     revisionNumber: 'Rev 0.1-Provisional'
+  }
+];
+
+export const INITIAL_HARDWARE_INVENTORIES: ProjectHardwareInventory[] = [
+  {
+    id: 'inv-01',
+    projectId: 'site-01',
+    projectReference: 'PRJ-AFE-2026-0842',
+    siteId: 'site-01',
+    siteName: 'Tshivhase Commercial High-Rise (Menlyn Central)',
+    lastAuditDate: '2026-08-28',
+    auditedBy: 'Russia Bethuel Moukangwe',
+    auditorSaqccNumber: 'SAQCC-SANS10139-COMM-2022/03/23',
+    inventoryRef: 'INV-MEN-2026-0842',
+    panelDetails: {
+      brand: 'Kentec Syncro AS',
+      model: 'Syncro AS 4-Loop Addressable',
+      serialNumber: 'SN-KNT-889102',
+      location: 'Ground Floor Security Control Centre',
+      loopCount: 4,
+      zoneCount: 16,
+      powerSupplyModel: 'Syncro 24V 5.25A Switch-Mode PSU',
+      standbyBatteryAh: 17
+    },
+    zones: [
+      { zoneNumber: 1, zoneName: 'Zone 1: Basement 2 Parking & Sump Room', floorOrArea: 'Basement Level 2', deviceCount: 12 },
+      { zoneNumber: 2, zoneName: 'Zone 2: Basement 1 Parking & Generator Room', floorOrArea: 'Basement Level 1', deviceCount: 14 },
+      { zoneNumber: 3, zoneName: 'Zone 3: Ground Floor Main Reception & Security Foyer', floorOrArea: 'Ground Floor', deviceCount: 16 },
+      { zoneNumber: 4, zoneName: 'Zone 4: Ground Floor Public Auditorium & Coffee Shop', floorOrArea: 'Ground Floor', deviceCount: 15 },
+      { zoneNumber: 5, zoneName: 'Zone 5: Level 1 East Commercial Office Wing', floorOrArea: 'Level 1 East', deviceCount: 14 },
+      { zoneNumber: 6, zoneName: 'Zone 6: Level 1 West Training Suites & Labs', floorOrArea: 'Level 1 West', deviceCount: 13 },
+      { zoneNumber: 7, zoneName: 'Zone 7: Level 2 East Engineering Open Plan', floorOrArea: 'Level 2 East', deviceCount: 14 },
+      { zoneNumber: 8, zoneName: 'Zone 8: Level 2 West Executive Boardroom Suites', floorOrArea: 'Level 2 West', deviceCount: 12 },
+      { zoneNumber: 9, zoneName: 'Zone 9: Level 3 East Financial Services Wing', floorOrArea: 'Level 3 East', deviceCount: 14 },
+      { zoneNumber: 10, zoneName: 'Zone 10: Level 3 West Telecom & Primary Server Room', floorOrArea: 'Level 3 West', deviceCount: 11 },
+      { zoneNumber: 11, zoneName: 'Zone 11: Level 4 Executive Suites & Outdoor Terrace', floorOrArea: 'Level 4', deviceCount: 13 },
+      { zoneNumber: 12, zoneName: 'Zone 12: Rooftop Plant & Lift Motor Rooms', floorOrArea: 'Roof Plant', deviceCount: 10 },
+      { zoneNumber: 13, zoneName: 'Zone 13: Core Stairwell A (Pressurized Escape Route)', floorOrArea: 'Vertical Core East', deviceCount: 11 },
+      { zoneNumber: 14, zoneName: 'Zone 14: Core Stairwell B (Pressurized Escape Route)', floorOrArea: 'Vertical Core West', deviceCount: 11 },
+      { zoneNumber: 15, zoneName: 'Zone 15: East Lift Shafts & Lobby Landings', floorOrArea: 'Shafts East', deviceCount: 12 },
+      { zoneNumber: 16, zoneName: 'Zone 16: Goods Delivery Dock & Waste Management', floorOrArea: 'Ground Dock', deviceCount: 14 }
+    ],
+    loops: [
+      { loopNumber: 1, loopProtocol: 'Apollo Discovery XP95', activeDevicesCount: 54, maxLoopCapacity: 126, cableLengthMeters: 480, classAVerified: true },
+      { loopNumber: 2, loopProtocol: 'Apollo Discovery XP95', activeDevicesCount: 52, maxLoopCapacity: 126, cableLengthMeters: 460, classAVerified: true },
+      { loopNumber: 3, loopProtocol: 'Apollo Discovery XP95', activeDevicesCount: 50, maxLoopCapacity: 126, cableLengthMeters: 440, classAVerified: true },
+      { loopNumber: 4, loopProtocol: 'Apollo Discovery XP95', activeDevicesCount: 50, maxLoopCapacity: 126, cableLengthMeters: 430, classAVerified: true }
+    ],
+    deviceScheduleSummary: {
+      blueDotSmokeDetectors: 124,
+      blackDotHeatDetectors: 18,
+      redDotSoundersSirens: 16,
+      greenDotManualCallPoints: 14,
+      multiSensorDetectors: 22,
+      opticalBeamDetectors: 4,
+      aspiratingSamplingPoints: 8,
+      totalDeviceCount: 206
+    },
+    deviceRecords: [
+      { id: 'dev-001', deviceType: 'optical_smoke', tag: 'L1-D001', zoneNumber: 1, zoneName: 'Zone 1: Basement 2 Parking & Sump Room', loopNumber: 1, addressOnLoop: 1, make: 'Apollo', model: 'Discovery Optical Smoke (58000-600)', serialNumber: 'APO-882101', locationDescription: 'B2 Ingress Ramp Entry', installedDate: '2026-02-14', status: 'operational', complianceCode: 'blue_dot' },
+      { id: 'dev-002', deviceType: 'heat_detector', tag: 'L1-D002', zoneNumber: 2, zoneName: 'Zone 2: Basement 1 Parking & Generator Room', loopNumber: 1, addressOnLoop: 2, make: 'Apollo', model: 'Discovery Rate-of-Rise Heat (58000-400)', serialNumber: 'APO-882102', locationDescription: 'Generator Plant Ceiling Center', installedDate: '2026-02-14', status: 'operational', complianceCode: 'black_dot' },
+      { id: 'dev-003', deviceType: 'manual_call_point', tag: 'L1-MCP01', zoneNumber: 3, zoneName: 'Zone 3: Ground Floor Main Reception & Security Foyer', loopNumber: 1, addressOnLoop: 3, make: 'Apollo', model: 'Discovery Intelligent Call Point (58100-910)', serialNumber: 'APO-991041', locationDescription: 'GF Main Entrance Turnstile Left (1.4m)', installedDate: '2026-02-15', status: 'operational', complianceCode: 'green_dot' },
+      { id: 'dev-004', deviceType: 'sounder_siren', tag: 'L1-S001', zoneNumber: 3, zoneName: 'Zone 3: Ground Floor Main Reception & Security Foyer', loopNumber: 1, addressOnLoop: 4, make: 'Apollo', model: 'Integrated Base Sounder VAD (45681-330)', serialNumber: 'APO-771201', locationDescription: 'GF Reception Atrium Wall East', installedDate: '2026-02-15', status: 'operational', complianceCode: 'red_dot' },
+      { id: 'dev-005', deviceType: 'multi_sensor', tag: 'L2-MS01', zoneNumber: 10, zoneName: 'Zone 10: Level 3 West Telecom & Primary Server Room', loopNumber: 2, addressOnLoop: 15, make: 'Apollo', model: 'Discovery Multisensor Smoke/Heat (58000-700)', serialNumber: 'APO-441092', locationDescription: 'L3 Primary Server Rack Row 1', installedDate: '2026-02-18', status: 'operational', complianceCode: 'purple_dot' },
+      { id: 'dev-006', deviceType: 'optical_beam', tag: 'L3-OB01', zoneNumber: 4, zoneName: 'Zone 4: Ground Floor Public Auditorium & Coffee Shop', loopNumber: 3, addressOnLoop: 22, make: 'FireBeam', model: 'The Fire Beam Xtra Reflective (50m)', serialNumber: 'FBM-661001', locationDescription: 'Auditorium High Ceiling North Span', installedDate: '2026-02-20', status: 'operational', complianceCode: 'amber_dot' },
+      { id: 'dev-007', deviceType: 'aspirating_point', tag: 'L4-ASD01', zoneNumber: 10, zoneName: 'Zone 10: Level 3 West Telecom & Primary Server Room', loopNumber: 4, addressOnLoop: 31, make: 'VESDA', model: 'VESDA LaserFOCUS VLF-250 High Sensitivity', serialNumber: 'VSD-221088', locationDescription: 'L3 Telecom Core Return Air Plenums', installedDate: '2026-02-22', status: 'operational', complianceCode: 'cyan_dot' }
+    ],
+    notes: 'Comprehensive annual hardware audit completed with calibrated Solo aerosol tester and optical laser distancing.'
+  },
+  {
+    id: 'inv-02',
+    projectId: 'site-02',
+    projectReference: 'PRJ-AFE-2026-0512',
+    siteId: 'site-02',
+    siteName: 'Pretoria West Industrial Logistics Hub',
+    lastAuditDate: '2026-07-20',
+    auditedBy: 'Sipho Ndlovu',
+    auditorSaqccNumber: 'SAQCC-8812040987',
+    inventoryRef: 'INV-LOG-2026-0512',
+    panelDetails: {
+      brand: 'Ziton',
+      model: 'ZP3 Multi-Panel Network (6-Loop)',
+      serialNumber: 'SN-ZTN-992144',
+      location: 'Gatehouse Security Control Desk',
+      loopCount: 6,
+      zoneCount: 24,
+      powerSupplyModel: 'Ziton 24V 6A Monitored Power Unit',
+      standbyBatteryAh: 24
+    },
+    zones: Array.from({ length: 24 }, (_, i) => ({
+      zoneNumber: i + 1,
+      zoneName: `Zone ${i + 1}: High-Bay Bay ${String.fromCharCode(65 + (i % 8))} Storage & Logistics`,
+      floorOrArea: `Warehouse Section ${Math.floor(i / 6) + 1}`,
+      deviceCount: 12
+    })),
+    loops: [
+      { loopNumber: 1, loopProtocol: 'Ziton ZP Protocol', activeDevicesCount: 48, maxLoopCapacity: 127, cableLengthMeters: 620, classAVerified: true },
+      { loopNumber: 2, loopProtocol: 'Ziton ZP Protocol', activeDevicesCount: 50, maxLoopCapacity: 127, cableLengthMeters: 640, classAVerified: true },
+      { loopNumber: 3, loopProtocol: 'Ziton ZP Protocol', activeDevicesCount: 48, maxLoopCapacity: 127, cableLengthMeters: 600, classAVerified: true },
+      { loopNumber: 4, loopProtocol: 'Ziton ZP Protocol', activeDevicesCount: 46, maxLoopCapacity: 127, cableLengthMeters: 590, classAVerified: true },
+      { loopNumber: 5, loopProtocol: 'Ziton ZP Protocol', activeDevicesCount: 48, maxLoopCapacity: 127, cableLengthMeters: 610, classAVerified: true },
+      { loopNumber: 6, loopProtocol: 'Ziton ZP Protocol', activeDevicesCount: 48, maxLoopCapacity: 127, cableLengthMeters: 630, classAVerified: true }
+    ],
+    deviceScheduleSummary: {
+      blueDotSmokeDetectors: 168,
+      blackDotHeatDetectors: 34,
+      redDotSoundersSirens: 26,
+      greenDotManualCallPoints: 22,
+      multiSensorDetectors: 24,
+      opticalBeamDetectors: 8,
+      aspiratingSamplingPoints: 6,
+      totalDeviceCount: 288
+    },
+    deviceRecords: [
+      { id: 'dev-101', deviceType: 'optical_smoke', tag: 'L1-D001', zoneNumber: 1, zoneName: 'Zone 1: High-Bay Bay A Storage & Logistics', loopNumber: 1, addressOnLoop: 1, make: 'Ziton', model: 'ZP730-2 Optical Smoke', serialNumber: 'ZTN-112001', locationDescription: 'Dispatch Gate North', installedDate: '2026-01-10', status: 'operational', complianceCode: 'blue_dot' },
+      { id: 'dev-102', deviceType: 'heat_detector', tag: 'L1-D002', zoneNumber: 2, zoneName: 'Zone 2: High-Bay Bay B Storage & Logistics', loopNumber: 1, addressOnLoop: 2, make: 'Ziton', model: 'ZP720-3 Rate-of-Rise Heat', serialNumber: 'ZTN-112002', locationDescription: 'Battery Charging Bay', installedDate: '2026-01-10', status: 'operational', complianceCode: 'black_dot' },
+      { id: 'dev-103', deviceType: 'optical_beam', tag: 'L2-OB01', zoneNumber: 3, zoneName: 'Zone 3: High-Bay Bay C Storage & Logistics', loopNumber: 2, addressOnLoop: 12, make: 'FireBeam', model: 'The Fire Beam Xtra (100m)', serialNumber: 'FBM-884192', locationDescription: 'High-Bay 12m Ceiling Truss Center', installedDate: '2026-01-12', status: 'operational', complianceCode: 'amber_dot' }
+    ]
+  },
+  {
+    id: 'inv-03',
+    projectId: 'site-03',
+    projectReference: 'PRJ-AFE-2026-0309',
+    siteId: 'site-03',
+    siteName: 'Centurion Medical & Healthcare Suites',
+    lastAuditDate: '2026-06-15',
+    auditedBy: 'Russia Bethuel Moukangwe',
+    auditorSaqccNumber: 'SAQCC-SANS10139-COMM-2022/03/23',
+    inventoryRef: 'INV-MED-2026-0309',
+    panelDetails: {
+      brand: 'Kentec',
+      model: 'Syncro AS 2-Loop Addressable',
+      serialNumber: 'SN-KNT-331908',
+      location: 'Nurse Triage Station 1',
+      loopCount: 2,
+      zoneCount: 8,
+      powerSupplyModel: 'Syncro 24V 3A Monitored PSU',
+      standbyBatteryAh: 12
+    },
+    zones: [
+      { zoneNumber: 1, zoneName: 'Zone 1: Ground Floor Outpatient Reception', floorOrArea: 'Ground Floor', deviceCount: 12 },
+      { zoneNumber: 2, zoneName: 'Zone 2: Consulting Rooms 1-6', floorOrArea: 'Ground Floor', deviceCount: 14 },
+      { zoneNumber: 3, zoneName: 'Zone 3: Minor Trauma & Radiology Unit', floorOrArea: 'Ground Floor West', deviceCount: 12 },
+      { zoneNumber: 4, zoneName: 'Zone 4: Dispensary & Pharmaceutical Store', floorOrArea: 'Ground Floor Central', deviceCount: 10 },
+      { zoneNumber: 5, zoneName: 'Zone 5: First Floor Day Ward Suites', floorOrArea: 'First Floor East', deviceCount: 14 },
+      { zoneNumber: 6, zoneName: 'Zone 6: First Floor Surgical Theatres 1 & 2', floorOrArea: 'First Floor West', deviceCount: 12 },
+      { zoneNumber: 7, zoneName: 'Zone 7: Recovery Ward & Nurse Sub-Station', floorOrArea: 'First Floor North', deviceCount: 12 },
+      { zoneNumber: 8, zoneName: 'Zone 8: Plant Room, Medical Gas Manifold & UPS', floorOrArea: 'First Floor Plant', deviceCount: 10 }
+    ],
+    loops: [
+      { loopNumber: 1, loopProtocol: 'Hochiki ESP Protocol', activeDevicesCount: 48, maxLoopCapacity: 127, cableLengthMeters: 380, classAVerified: true },
+      { loopNumber: 2, loopProtocol: 'Hochiki ESP Protocol', activeDevicesCount: 48, maxLoopCapacity: 127, cableLengthMeters: 360, classAVerified: true }
+    ],
+    deviceScheduleSummary: {
+      blueDotSmokeDetectors: 58,
+      blackDotHeatDetectors: 12,
+      redDotSoundersSirens: 10,
+      greenDotManualCallPoints: 8,
+      multiSensorDetectors: 6,
+      opticalBeamDetectors: 2,
+      aspiratingSamplingPoints: 0,
+      totalDeviceCount: 96
+    },
+    deviceRecords: [
+      { id: 'dev-201', deviceType: 'optical_smoke', tag: 'L1-D001', zoneNumber: 1, zoneName: 'Zone 1: Ground Floor Outpatient Reception', loopNumber: 1, addressOnLoop: 1, make: 'Hochiki', model: 'ALN-EN Optical Smoke Sensor', serialNumber: 'HCK-991001', locationDescription: 'Main Entrance Foyer', installedDate: '2026-03-01', status: 'operational', complianceCode: 'blue_dot' },
+      { id: 'dev-202', deviceType: 'heat_detector', tag: 'L1-D002', zoneNumber: 8, zoneName: 'Zone 8: Plant Room & Medical Gas', loopNumber: 1, addressOnLoop: 2, make: 'Hochiki', model: 'ATJ-EN Multi-Heat Sensor', serialNumber: 'HCK-991002', locationDescription: 'Medical Gas Manifold Vault', installedDate: '2026-03-01', status: 'operational', complianceCode: 'black_dot' },
+      { id: 'dev-203', deviceType: 'sounder_siren', tag: 'L2-S001', zoneNumber: 5, zoneName: 'Zone 5: First Floor Day Ward Suites', loopNumber: 2, addressOnLoop: 8, make: 'Hochiki', model: 'CHQ-WS2 Wall Sounder VAD', serialNumber: 'HCK-551022', locationDescription: 'Day Ward Corridor Midpoint', installedDate: '2026-03-04', status: 'operational', complianceCode: 'red_dot' }
+    ]
   }
 ];

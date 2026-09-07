@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { COMPANY_DETAILS } from '../../data/initialData';
 import { useAudrinStore } from '../../services/store';
+import { ThemeSwitcher } from './ThemeSwitcher';
+import { AudrinLogo } from '../common/AudrinLogo';
 
 interface HeaderProps {
   currentView: string;
@@ -101,24 +103,18 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo Brand */}
+          {/* Official Audrin Fire Engineers Logo */}
           <div 
             onClick={() => onNavigate('home')} 
-            className="flex items-center gap-3.5 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group py-1"
+            title="AUDRIN FIRE ENGINEERS — Home"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1A1A1C] to-[#2A2A2E] flex items-center justify-center border border-[#C1A461]/30 group-hover:border-[#C1A461] transition shadow-lg">
-              <Flame className="w-5 h-5 text-[#C1A461]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1 text-lg sm:text-xl font-bold tracking-tighter text-white">
-                <span>AUDRIN</span>
-                <span className="text-[#C1A461]">.</span>
-                <span className="text-white/80 font-normal">FIRE ENGINEERS</span>
-              </div>
-              <p className="text-[9px] text-[#C1A461]/80 font-bold uppercase tracking-[2px]">
-                {COMPANY_DETAILS.tagline}
-              </p>
-            </div>
+            <AudrinLogo 
+              variant="full" 
+              size="md" 
+              showTagline={true} 
+              className="group-hover:opacity-95 transition"
+            />
           </div>
 
           {/* Desktop Nav Links */}
@@ -165,6 +161,9 @@ export const Header: React.FC<HeaderProps> = ({
               <FileText className="w-3.5 h-3.5" />
               <span>Request Service</span>
             </button>
+
+            {/* Global Theme Switcher (Daylight Default & Brand-Navy Night Inspection) */}
+            <ThemeSwitcher variant="navbar" />
 
             {/* Role & Dashboard Switcher (Aureus Tier Style) */}
             <div className="relative">
@@ -252,11 +251,12 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Mobile menu toggle */}
-          <div className="flex lg:hidden items-center gap-2">
+          {/* Mobile menu toggle and theme switch */}
+          <div className="flex lg:hidden items-center gap-1.5">
+            <ThemeSwitcher variant="compact" />
             <button
               onClick={handleFault}
-              className="px-3 py-1.5 rounded-lg bg-red-950/40 text-red-300 text-xs font-bold border border-red-500/30"
+              className="px-2.5 py-1.5 rounded-lg bg-red-950/40 text-red-300 text-xs font-bold border border-red-500/30"
             >
               Fault
             </button>
@@ -273,6 +273,9 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-[#0A0A0B] border-b border-white/5 px-4 pt-3 pb-6 space-y-4">
+          {/* Mobile Theme Switcher Card */}
+          <ThemeSwitcher variant="drawer" />
+
           <div className="grid grid-cols-2 gap-2 pt-1">
             <button
               onClick={() => { handleRequest(); setMobileMenuOpen(false); }}

@@ -841,7 +841,13 @@ export const CompanyBrandingManager: React.FC<CompanyBrandingManagerProps> = ({
             
             {/* Header Area */}
             <div className="flex items-start justify-between border-b-2 border-slate-800 pb-4">
-              <div className="space-y-1">
+              <div className="space-y-1.5">
+                <img 
+                  src="/audrin-logo.svg" 
+                  alt="Audrin Fire Engineers Logo" 
+                  className="h-10 w-auto object-contain mb-1" 
+                  referrerPolicy="no-referrer"
+                />
                 <div className="text-xs uppercase font-bold tracking-widest text-[#987d3a]">
                   {issuerData.legalName}
                 </div>

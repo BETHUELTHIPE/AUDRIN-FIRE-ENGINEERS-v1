@@ -25,6 +25,7 @@ import { SafetyFileDossier, SafetyFileApprovalEntry } from '../../types';
 import { COMPANY_DETAILS } from '../../data/initialData';
 import { DigitalSignatureCanvas } from './DigitalSignatureCanvas';
 import { generateSafetyFileCompletePdf } from '../../services/safetyFilePdfGenerator';
+import { AudrinLogo } from '../common/AudrinLogo';
 
 interface SafetyFileCoverProps {
   dossierId?: string;
@@ -168,14 +169,15 @@ export const SafetyFileCover: React.FC<SafetyFileCoverProps> = ({
         {/* Official Header Banner */}
         <div className="bg-[#0B1C44] text-white px-8 py-7 border-b-4 border-[#C1A461] relative">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-1.5 max-w-2xl">
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#C1A461]" />
-                <span className="text-xs font-bold uppercase tracking-widest text-[#C1A461]">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex items-center gap-4">
+                <AudrinLogo variant="full" themeMode="dark" size="md" />
+                <span className="hidden sm:inline-block w-px h-6 bg-white/20" />
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[#C1A461]">
                   Official Statutory Life-Safety Documentation
                 </span>
               </div>
-              <h2 className="text-2xl font-black tracking-tight text-white font-serif">
+              <h2 className="text-xl font-bold tracking-tight text-white/90 font-sans">
                 {COMPANY_DETAILS.legalName}
               </h2>
               <p className="text-xs text-slate-300">
@@ -274,13 +276,23 @@ export const SafetyFileCover: React.FC<SafetyFileCoverProps> = ({
             {/* Principal Contractor Profile */}
             <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
               <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-blue-900" />
-                  Specialist Fire Engineering Contractor
-                </h3>
-                <span className="text-[11px] font-bold text-blue-900 bg-blue-100 px-2 py-0.5 rounded">
-                  SAQCC Accredited
-                </span>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Specialist Fire Engineering Contractor
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <img 
+                    src="/audrin-logo.svg" 
+                    alt="Audrin Fire Engineers" 
+                    className="h-6 w-auto object-contain" 
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="text-[10px] font-bold text-blue-900 bg-blue-100 px-2 py-0.5 rounded">
+                    SAQCC Accredited
+                  </span>
+                </div>
               </div>
 
               <dl className="space-y-2 text-xs">

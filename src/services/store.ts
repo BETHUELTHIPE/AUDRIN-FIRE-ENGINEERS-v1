@@ -46,7 +46,9 @@ import {
   ComplianceAuditLogQuery,
   PaginatedComplianceAuditLogsResult,
   ProjectHistoryExportResult,
-  CertificateRevisionRecord
+  CertificateRevisionRecord,
+  ProjectHardwareInventory,
+  GlobalTheme
 } from '../types';
 
 import {
@@ -69,6 +71,7 @@ import {
   SANS_10139_RULES_BENCHMARK,
   INITIAL_SANS_LOGBOOK,
   INITIAL_SANS_COCS,
+  INITIAL_HARDWARE_INVENTORIES,
   SansRuleDefinition
 } from '../data/initialData';
 
@@ -128,13 +131,16 @@ const STORAGE_KEYS = {
   ACTIVE_TECHNICIAN_ID: 'afe_active_technician_id',
   SAFETY_FILE_DOSSIERS: 'afe_safety_file_dossiers',
   COMPLIANCE_AUDIT_RECORDS: 'afe_compliance_audit_records',
-  COC_REVISIONS: 'afe_coc_revisions'
+  COC_REVISIONS: 'afe_coc_revisions',
+  HARDWARE_INVENTORIES: 'afe_hardware_inventories',
+  GLOBAL_THEME: 'afe_global_theme'
 };
 
 export class AudrinStore {
   private static instance: AudrinStore;
   private listeners: Set<() => void> = new Set();
 
+  private theme: GlobalTheme = 'light';
   private user: User = DEFAULT_USER;
   private services: ServiceRecord[] = APPROVED_SERVICES;
   private stages: HowWeWorkStage[] = HOW_WE_WORK_STAGES;
@@ -145,6 +151,7 @@ export class AudrinStore {
   private sansLogbook: SansLogbookEntry[] = INITIAL_SANS_LOGBOOK;
   private sansCocs: SansCocCertificate[] = INITIAL_SANS_COCS;
   private cocRevisions: CertificateRevisionRecord[] = [];
+  private hardwareInventories: ProjectHardwareInventory[] = INITIAL_HARDWARE_INVENTORIES;
   private sansRulesBenchmark: SansRuleDefinition[] = SANS_10139_RULES_BENCHMARK;
   private approvedSourceDocuments: ApprovedSourceDocument[] = APPROVED_SOURCE_DOCUMENTS;
   private sourceRequirements: SourceRequirement[] = SOURCE_REQUIREMENT_REGISTER;
@@ -548,6 +555,19 @@ AUDRIN FIRE ENGINEERS (PTY) LTD`,
       } else {
         this.seedInitialCocRevisions();
       }
+
+      const storedHardware = localStorage.getItem(STORAGE_KEYS.HARDWARE_INVENTORIES);
+      if (storedHardware) {
+        this.hardwareInventories = JSON.parse(storedHardware);
+      }
+
+      const storedTheme = localStorage.getItem(STORAGE_KEYS.GLOBAL_THEME);
+      if (storedTheme === 'dark' || storedTheme === 'light') {
+        this.theme = storedTheme as GlobalTheme;
+      } else {
+        this.theme = 'light';
+      }
+      this.applyThemeToDom(this.theme);
     } catch {
       // Storage parsing fallback
     }
@@ -618,10 +638,42 @@ AUDRIN FIRE ENGINEERS (PTY) LTD`,
       localStorage.setItem(STORAGE_KEYS.SAFETY_FILE_DOSSIERS, JSON.stringify(this.safetyFileDossiers));
       localStorage.setItem(STORAGE_KEYS.COMPLIANCE_AUDIT_RECORDS, JSON.stringify(this.complianceAuditRecords));
       localStorage.setItem(STORAGE_KEYS.COC_REVISIONS, JSON.stringify(this.cocRevisions));
+      localStorage.setItem(STORAGE_KEYS.HARDWARE_INVENTORIES, JSON.stringify(this.hardwareInventories));
+      localStorage.setItem(STORAGE_KEYS.GLOBAL_THEME, this.theme);
     } catch {
       // Ignore storage quota
     }
     this.notify();
+  }
+
+  // Theme Management (Light Theme Default & Brand-Navy Dark Mode)
+  public getTheme(): GlobalTheme {
+    return this.theme;
+  }
+
+  public setTheme(theme: GlobalTheme): void {
+    this.theme = theme;
+    this.applyThemeToDom(theme);
+    this.saveToStorage();
+  }
+
+  public toggleTheme(): GlobalTheme {
+    const next = this.theme === 'light' ? 'dark' : 'light';
+    this.setTheme(next);
+    return next;
+  }
+
+  public applyThemeToDom(theme: GlobalTheme = this.theme): void {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.remove('theme-light', 'theme-dark');
+      document.documentElement.classList.add(`theme-${theme}`);
+      if (document.body) {
+        document.body.setAttribute('data-theme', theme);
+        document.body.classList.remove('theme-light', 'theme-dark');
+        document.body.classList.add(`theme-${theme}`);
+      }
+    }
   }
 
   public subscribe(listener: () => void): () => void {
@@ -1524,6 +1576,42 @@ Address: 27 Tshivhase Street, Pretoria West, Pretoria, 0008`,
 
     this.saveToStorage();
     return revisionRecord;
+  }
+
+  // ============================================================================
+  // PROJECT HARDWARE INVENTORY METHODS (SANS 10139 Compliance & COC Sync)
+  // ============================================================================
+
+  public getProjectHardwareInventory(siteIdOrProjectRef?: string): ProjectHardwareInventory | undefined {
+    if (!this.hardwareInventories || this.hardwareInventories.length === 0) {
+      return INITIAL_HARDWARE_INVENTORIES[0];
+    }
+    if (!siteIdOrProjectRef) {
+      return this.hardwareInventories[0];
+    }
+    const clean = siteIdOrProjectRef.trim().toLowerCase();
+    const matched = this.hardwareInventories.find(inv => 
+      inv.siteId.toLowerCase() === clean ||
+      inv.projectId.toLowerCase() === clean ||
+      inv.projectReference.toLowerCase() === clean ||
+      inv.inventoryRef.toLowerCase() === clean ||
+      inv.siteName.toLowerCase().includes(clean)
+    );
+    return matched || this.hardwareInventories[0];
+  }
+
+  public getAllProjectHardwareInventories(): ProjectHardwareInventory[] {
+    return [...this.hardwareInventories];
+  }
+
+  public updateProjectHardwareInventory(inventory: ProjectHardwareInventory): void {
+    const idx = this.hardwareInventories.findIndex(i => i.id === inventory.id);
+    if (idx !== -1) {
+      this.hardwareInventories[idx] = inventory;
+    } else {
+      this.hardwareInventories.push(inventory);
+    }
+    this.saveToStorage();
   }
 
   public sendCocEmail(
